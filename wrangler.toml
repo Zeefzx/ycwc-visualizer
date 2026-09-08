@@ -1,5 +1,0 @@
-name = "visualizer-ai"
-compatibility_date = "2024-09-25"
-
-[site]
-bucket = "./dist"
