@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualizer AI — Tutor Fisika & Matematika</title>
+  <meta name="description" content="Tutor fisika dan matematika SMA interaktif yang mengubah rumus abstrak menjadi simulasi visual menggunakan barang-barang sehari-hari." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script type="module" crossorigin src="/assets/index-CJQhX0s5.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BefRkkM-.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          <h1 class="logo-text">Visualizer<span class="logo-accent">AI</span></h1>
+        </div>
+        <button id="btn-new-chat" class="btn-new-chat" title="Chat Baru">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">Topik Populer</p>
+        <div id="quick-topics" class="quick-topics"></div>
+      </div>
+
+      <div class="sidebar-section sidebar-history">
+        <p class="sidebar-label">Riwayat Chat</p>
+        <div id="chat-history-list" class="chat-history-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="btn-settings" class="btn-settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
+          <span>Pengaturan</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile sidebar toggle -->
+    <button id="btn-sidebar-toggle" class="btn-sidebar-toggle" title="Toggle Sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12h18M3 6h18M3 18h18"/>
+      </svg>
+    </button>
+
+    <!-- Main Chat Area -->
+    <main id="main-content" class="main-content">
+      <div id="chat-container" class="chat-container">
+        <!-- Welcome screen (shown when no messages) -->
+        <div id="welcome-screen" class="welcome-screen">
+          <div class="welcome-icon">🔬</div>
+          <h2 class="welcome-title">Halo! Gue <span class="welcome-accent">Visualizer AI</span></h2>
+          <p class="welcome-desc">Ketik rumus atau konsep fisika/matematika apa aja, dan gue bakal bikin simulasi visual yang bisa lo praktekin langsung di meja belajar.</p>
+          <div class="welcome-examples">
+            <button class="welcome-chip" data-prompt="Jelasin rumus F = ma pakai barang di kamar">F = ma</button>
+            <button class="welcome-chip" data-prompt="Visualisasiin konsep sin dan cos pakai barang sehari-hari">Sin & Cos</button>
+            <button class="welcome-chip" data-prompt="Gimana cara memahami resultan vektor secara visual?">Resultan Vektor</button>
+            <button class="welcome-chip" data-prompt="Jelasin hukum kekekalan energi pakai analogi barang di kamar">Kekekalan Energi</button>
+          </div>
+        </div>
+
+        <!-- Chat messages -->
+        <div id="chat-messages" class="chat-messages"></div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="input-bar-wrapper">
+        <div class="input-bar">
+          <textarea
+            id="input-message"
+            class="input-message"
+            placeholder="Ketik rumus atau konsep di sini..."
+            rows="1"
+          ></textarea>
+          <button id="btn-send" class="btn-send" disabled title="Kirim">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          </button>
+        </div>
+        <p class="input-hint">Tekan Enter untuk kirim · Shift+Enter untuk baris baru</p>
+      </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Pengaturan</h3>
+          <button id="btn-close-modal" class="btn-close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="api-key-input">Gemini API Key</label>
+            <p class="form-hint">Dapatkan API key gratis di <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a></p>
+            <div class="input-with-action">
+              <input type="password" id="api-key-input" class="form-input" placeholder="AIza..." />
+              <button id="btn-toggle-key" class="btn-icon" title="Tampilkan/Sembunyikan">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="model-select">Model</label>
+            <select id="model-select" class="form-select">
+              <optgroup label="Gemini 3.8">
+                <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+                <option value="gemini-3.8-flash-preview">Gemini 3.8 Flash Preview</option>
+                <option value="gemini-3.8-pro">Gemini 3.8 Pro</option>
+              </optgroup>
+              <optgroup label="Gemini 3.7">
+                <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+                <option value="gemini-3.7-flash-preview">Gemini 3.7 Flash Preview</option>
+                <option value="gemini-3.7-pro">Gemini 3.7 Pro</option>
+              </optgroup>
+              <optgroup label="Gemini 3.6">
+                <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+                <option value="gemini-3.6-flash-preview">Gemini 3.6 Flash Preview</option>
+                <option value="gemini-3.6-pro">Gemini 3.6 Pro</option>
+              </optgroup>
+              <optgroup label="Gemini 3.5">
+                <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+                <option value="gemini-3.5-flash-preview">Gemini 3.5 Flash Preview</option>
+                <option value="gemini-3.5-pro">Gemini 3.5 Pro</option>
+              </optgroup>
+              <optgroup label="Gemini 3.0">
+                <option value="gemini-3.0-flash">Gemini 3.0 Flash</option>
+                <option value="gemini-3.0-flash-preview">Gemini 3.0 Flash Preview</option>
+                <option value="gemini-3.0-pro">Gemini 3.0 Pro</option>
+              </optgroup>
+            </select>
+          </div>
+          <div id="api-key-status" class="api-key-status"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-save-settings" class="btn-primary">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
