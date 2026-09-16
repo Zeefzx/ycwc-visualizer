@@ -101,21 +101,9 @@ export function restoreMessages(messages) {
     messageEl.className = `message ${msg.role === 'user' ? 'user' : 'ai'}`;
 
     if (msg.role === 'user') {
-      messageEl.innerHTML = `
-        <div class="message-header">
-          <div class="message-avatar user">👤</div>
-          <span class="message-sender">Kamu</span>
-        </div>
-        <div class="message-body">${escapeHtml(msg.text)}</div>
-      `;
+      messageEl.innerHTML = `<div class="message-bubble user-bubble">${escapeHtml(msg.text)}</div>`;
     } else {
-      messageEl.innerHTML = `
-        <div class="message-header">
-          <div class="message-avatar ai">⚡</div>
-          <span class="message-sender">Visualizer AI</span>
-        </div>
-        <div class="message-body">${renderContent(msg.text)}</div>
-      `;
+      messageEl.innerHTML = `<div class="message-bubble ai-bubble">${renderContent(msg.text)}</div>`;
     }
 
     container.appendChild(messageEl);
@@ -146,13 +134,7 @@ export function addUserMessage(text) {
   const container = chatMessages();
   const messageEl = document.createElement('div');
   messageEl.className = 'message user';
-  messageEl.innerHTML = `
-    <div class="message-header">
-      <div class="message-avatar user">👤</div>
-      <span class="message-sender">Kamu</span>
-    </div>
-    <div class="message-body">${escapeHtml(text)}</div>
-  `;
+  messageEl.innerHTML = `<div class="message-bubble user-bubble">${escapeHtml(text)}</div>`;
 
   container.appendChild(messageEl);
   scrollToBottom();
@@ -169,18 +151,11 @@ export function createAIMessage() {
   const messageEl = document.createElement('div');
   messageEl.className = 'message ai';
 
-  const bodyEl = document.createElement('div');
-  bodyEl.className = 'message-body';
-
-  messageEl.innerHTML = `
-    <div class="message-header">
-      <div class="message-avatar ai">⚡</div>
-      <span class="message-sender">Visualizer AI</span>
-    </div>
-  `;
+  const bubbleEl = document.createElement('div');
+  bubbleEl.className = 'message-bubble ai-bubble';
 
   // Show typing indicator first
-  bodyEl.innerHTML = `
+  bubbleEl.innerHTML = `
     <div class="typing-indicator">
       <div class="typing-dot"></div>
       <div class="typing-dot"></div>
@@ -188,7 +163,7 @@ export function createAIMessage() {
     </div>
   `;
 
-  messageEl.appendChild(bodyEl);
+  messageEl.appendChild(bubbleEl);
   container.appendChild(messageEl);
   scrollToBottom();
 
@@ -202,7 +177,7 @@ export function createAIMessage() {
      */
     appendChunk(text) {
       if (isFirstChunk) {
-        bodyEl.innerHTML = '';
+        bubbleEl.innerHTML = '';
         isFirstChunk = false;
       }
 
@@ -211,7 +186,7 @@ export function createAIMessage() {
       // Debounce rendering for performance
       if (renderTimeout) clearTimeout(renderTimeout);
       renderTimeout = setTimeout(() => {
-        bodyEl.innerHTML = renderContent(accumulatedText) + '<span class="cursor-blink"></span>';
+        bubbleEl.innerHTML = renderContent(accumulatedText) + '<span class="cursor-blink"></span>';
         scrollToBottom();
       }, 50);
     },
@@ -221,7 +196,7 @@ export function createAIMessage() {
      */
     finalize() {
       if (renderTimeout) clearTimeout(renderTimeout);
-      bodyEl.innerHTML = renderContent(accumulatedText);
+      bubbleEl.innerHTML = renderContent(accumulatedText);
       scrollToBottom();
     },
 
@@ -229,7 +204,7 @@ export function createAIMessage() {
      * Show an error in the message area.
      */
     showError(errorMessage) {
-      bodyEl.innerHTML = `<div class="error-inline">⚠️ ${escapeHtml(errorMessage)}</div>`;
+      bubbleEl.innerHTML = `<div class="error-inline">⚠️ ${escapeHtml(errorMessage)}</div>`;
       scrollToBottom();
     }
   };
