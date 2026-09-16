@@ -1378,3 +1378,107 @@ a:hover {
 .ai-bubble .katex-display > .katex {
   font-size: 1.15em;
 }
+
+/* === Interactive Visualization Containers === */
+.viz-container {
+  margin: 1em -18px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #0f0f1a;
+  transition: all var(--transition-base);
+}
+
+.viz-container:first-child {
+  margin-top: 0;
+}
+
+.viz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--bg-layer-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.viz-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+.viz-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.viz-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.viz-btn:hover {
+  background: var(--bg-layer-3);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.viz-iframe {
+  width: 100%;
+  height: 380px;
+  border: none;
+  display: block;
+  background: #0f0f1a;
+}
+
+/* Expanded / Fullscreen visualization */
+.viz-container.viz-expanded {
+  position: fixed;
+  inset: 20px;
+  margin: 0;
+  z-index: 999;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+  animation: scaleIn 0.25s ease;
+}
+
+.viz-container.viz-expanded .viz-iframe {
+  height: calc(100% - 44px);
+}
+
+/* Overlay when viz is expanded */
+.viz-container.viz-expanded::before {
+  content: '';
+  position: fixed;
+  inset: -20px;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -1;
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive viz */
+@media (max-width: 768px) {
+  .viz-container {
+    margin: 1em -12px;
+  }
+
+  .viz-iframe {
+    height: 280px;
+  }
+
+  .viz-container.viz-expanded {
+    inset: 10px;
+    border-radius: var(--radius-md);
+  }
+}

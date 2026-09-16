@@ -7,7 +7,7 @@ import { SYSTEM_PROMPT } from './prompt.js';
 
 let aiClient = null;
 let chatHistory = [];
-let currentModel = 'gemini-3.8-flash';
+let currentModel = 'gemini-2.5-flash';
 
 /**
  * Initialize the Gemini AI client with an API key.
@@ -66,7 +66,7 @@ export function setHistory(history) {
 export async function testApiKey(apiKey) {
   const testClient = new GoogleGenAI({ apiKey });
   const response = await testClient.models.generateContent({
-    model: 'gemini-3.6-flash',
+    model: 'gemini-2.0-flash-lite',
     contents: 'Balas dengan satu kata: "OK"',
   });
   return response.text ? true : false;

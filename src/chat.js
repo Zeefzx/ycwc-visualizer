@@ -1,7 +1,8 @@
 /**
  * Chat UI module.
- * Handles message rendering, streaming display, and scroll management.
- * Supports markdown (via marked) and LaTeX math (via KaTeX).
+ * Handles message rendering, streaming display, scroll management,
+ * and inline interactive HTML visualizations.
+ * Supports markdown (via marked), LaTeX math (via KaTeX), and HTML sandboxing.
  */
 import { marked } from 'marked';
 
@@ -14,6 +15,9 @@ marked.setOptions({
 const chatMessages = () => document.getElementById('chat-messages');
 const chatContainer = () => document.getElementById('chat-container');
 const welcomeScreen = () => document.getElementById('welcome-screen');
+
+// Counter for unique iframe IDs
+let vizCounter = 0;
 
 /**
  * Render LaTeX math expressions in HTML string using KaTeX.
@@ -53,12 +57,116 @@ function renderMath(html) {
 }
 
 /**
- * Process AI text: markdown + math rendering.
+ * Extract HTML code blocks from markdown text and replace them with placeholders.
+ * Returns { cleanText, visualizations[] }
+ */
+function extractVisualizations(text) {
+  const visualizations = [];
+  // Match ```html ... ``` code blocks (the AI generates these)
+  const regex = /```html\s*\n([\s\S]*?)```/g;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    const htmlCode = match[1].trim();
+    // Only treat as visualization if it looks like a full HTML document or has canvas/svg
+    if (
+      htmlCode.includes('<canvas') ||
+      htmlCode.includes('<svg') ||
+      htmlCode.includes('<!DOCTYPE') ||
+      htmlCode.includes('<html') ||
+      htmlCode.includes('requestAnimationFrame') ||
+      htmlCode.includes('<style')
+    ) {
+      const id = `viz-${++vizCounter}`;
+      visualizations.push({ id, html: htmlCode, fullMatch: match[0] });
+    }
+  }
+
+  return { visualizations };
+}
+
+/**
+ * Create a sandboxed iframe for an HTML visualization.
+ * @param {string} htmlCode - The full HTML code to render
+ * @param {string} id - Unique ID for the iframe
+ * @returns {string} HTML string for the visualization container
+ */
+function createVisualizationHTML(htmlCode, id) {
+  // Encode the HTML for the srcdoc attribute
+  const encodedHtml = htmlCode
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;');
+
+  return `
+    <div class="viz-container" id="${id}">
+      <div class="viz-header">
+        <span class="viz-label">📊 Visualisasi Interaktif</span>
+        <div class="viz-actions">
+          <button class="viz-btn viz-btn-expand" data-viz-id="${id}" title="Perbesar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+              <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <iframe
+        class="viz-iframe"
+        sandbox="allow-scripts"
+        srcdoc="${encodedHtml}"
+        loading="lazy"
+      ></iframe>
+    </div>
+  `;
+}
+
+/**
+ * Process AI text: markdown + math rendering + visualization embedding.
  */
 function renderContent(text) {
+  const { visualizations } = extractVisualizations(text);
+
+  // First render markdown normally
   let html = marked.parse(text);
   html = renderMath(html);
+
+  // Now replace the rendered code blocks with interactive iframes
+  // marked will have wrapped the HTML code blocks in <pre><code> tags
+  for (const viz of visualizations) {
+    // Find the <pre><code> block that contains this visualization's code
+    // We need to match the rendered version (marked escapes HTML entities in code blocks)
+    const vizHtml = createVisualizationHTML(viz.html, viz.id);
+
+    // Strategy: find <pre> blocks that contain key parts of the visualization code
+    // marked renders ```html as <pre><code class="language-html">...</code></pre>
+    const preRegex = /<pre><code class="language-html">[\s\S]*?<\/code><\/pre>/;
+    const preMatch = html.match(preRegex);
+
+    if (preMatch) {
+      html = html.replace(preMatch[0], vizHtml);
+    }
+  }
+
   return html;
+}
+
+/**
+ * Attach event listeners to visualization buttons after rendering.
+ */
+function attachVizListeners(containerEl) {
+  // Expand/fullscreen buttons
+  containerEl.querySelectorAll('.viz-btn-expand').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vizId = btn.dataset.vizId;
+      const vizContainer = document.getElementById(vizId);
+      if (vizContainer) {
+        vizContainer.classList.toggle('viz-expanded');
+        // Update button icon
+        const isExpanded = vizContainer.classList.contains('viz-expanded');
+        btn.title = isExpanded ? 'Kecilkan' : 'Perbesar';
+      }
+    });
+  });
 }
 
 /**
@@ -104,6 +212,8 @@ export function restoreMessages(messages) {
       messageEl.innerHTML = `<div class="message-bubble user-bubble">${escapeHtml(msg.text)}</div>`;
     } else {
       messageEl.innerHTML = `<div class="message-bubble ai-bubble">${renderContent(msg.text)}</div>`;
+      // Attach viz listeners after DOM insertion
+      setTimeout(() => attachVizListeners(messageEl), 0);
     }
 
     container.appendChild(messageEl);
@@ -197,6 +307,8 @@ export function createAIMessage() {
     finalize() {
       if (renderTimeout) clearTimeout(renderTimeout);
       bubbleEl.innerHTML = renderContent(accumulatedText);
+      // Attach visualization listeners after final render
+      setTimeout(() => attachVizListeners(messageEl), 100);
       scrollToBottom();
     },
 
