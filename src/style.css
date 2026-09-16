@@ -1174,6 +1174,20 @@ a:hover {
   color: var(--danger);
 }
 
+#redirect-uri-display {
+  background: var(--bg-layer-3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--accent);
+  user-select: all;
+  word-break: break-all;
+}
+
+#google-client-id-group .form-hint code {
+  cursor: pointer;
+}
+
 /* --- Animations --- */
 @keyframes fadeIn {
   from { opacity: 0; }
