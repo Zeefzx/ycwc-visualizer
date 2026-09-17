@@ -60,13 +60,13 @@ export function setHistory(history) {
 
 /**
  * Test the API key by making a small request.
- * Uses gemini-2.0-flash which is guaranteed to exist.
+ * Uses gemini-3.5-flash which is lightweight and reliable.
  * Returns true if valid, throws error if not.
  */
 export async function testApiKey(apiKey) {
   const testClient = new GoogleGenAI({ apiKey });
   const response = await testClient.models.generateContent({
-    model: 'gemini-2.0-flash-lite',
+    model: 'gemini-3.5-flash',
     contents: 'Balas dengan satu kata: "OK"',
   });
   return response.text ? true : false;
