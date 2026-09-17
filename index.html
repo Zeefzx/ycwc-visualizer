@@ -125,23 +125,6 @@
 
           <hr class="settings-divider" />
 
-          <!-- Google Account Section -->
-          <p class="settings-section-title">Akun</p>
-          <div class="form-group google-account-section">
-            <label>Google Account</label>
-            <p class="form-hint">Login untuk menyimpan riwayat chat ke cloud</p>
-            <div id="google-signin-area">
-              <!-- Populated by JS: sign-in button or user card -->
-            </div>
-          </div>
-          <div class="form-group" id="google-client-id-group">
-            <label for="google-client-id-input">Google OAuth Client ID</label>
-            <p class="form-hint">Buat di <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a> → OAuth 2.0 Client IDs → Web App. Tambahkan <code id="redirect-uri-display"></code> ke Authorized redirect URIs.</p>
-            <input type="text" id="google-client-id-input" class="form-input" placeholder="xxxxx.apps.googleusercontent.com" />
-          </div>
-
-          <hr class="settings-divider" />
-
           <!-- API Key Section -->
           <p class="settings-section-title">API</p>
           <div class="form-group">
@@ -159,13 +142,14 @@
           <div class="form-group">
             <label for="model-select">Model</label>
             <select id="model-select" class="form-select">
-              <optgroup label="Terbaru">
-                <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
-                <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash Preview</option>
+              <optgroup label="Gemini 3.x">
+                <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash</option>
+                <option value="gemini-3.8-flash-preview">Gemini 3.8 Flash Preview</option>
+                <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+                <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
               </optgroup>
-              <optgroup label="Gemini 2.0">
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+              <optgroup label="Gemini Pro">
+                <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
               </optgroup>
             </select>
           </div>

@@ -7,7 +7,7 @@ import { SYSTEM_PROMPT } from './prompt.js';
 
 let aiClient = null;
 let chatHistory = [];
-let currentModel = 'gemini-2.5-flash';
+let currentModel = 'gemini-3.8-flash';
 
 /**
  * Initialize the Gemini AI client with an API key.
