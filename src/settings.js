@@ -142,11 +142,11 @@ export function initSettings(onKeyReady) {
         setTimeout(() => closeModal(), 1000);
       } catch (err) {
         console.error('API key test failed:', err);
-        const msg = err.message || 'Unknown error';
+        const msg = err.message || '';
         if (msg.includes('API_KEY_INVALID') || msg.includes('401')) {
-          showStatus(statusEl, '❌ API key tidak valid. Cek ulang key kamu.', 'error');
+          showStatus(statusEl, '❌ API key tidak valid.', 'error');
         } else {
-          showStatus(statusEl, `❌ Gagal test key: ${msg}`, 'error');
+          showStatus(statusEl, '❌ Terjadi kesalahan, mohon coba lagi.', 'error');
         }
       } finally {
         btnSave.disabled = false;

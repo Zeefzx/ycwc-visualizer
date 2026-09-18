@@ -59,16 +59,19 @@ export function setHistory(history) {
 }
 
 /**
- * Test the API key by making a small request.
- * Uses gemini-3.6-flash which is lightweight and reliable.
+ * Test the API key by making a small request with a timeout.
  * Returns true if valid, throws error if not.
  */
 export async function testApiKey(apiKey) {
   const testClient = new GoogleGenAI({ apiKey });
-  const response = await testClient.models.generateContent({
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('TIMEOUT')), 10000)
+  );
+  const requestPromise = testClient.models.generateContent({
     model: 'gemini-3.6-flash',
-    contents: 'Balas dengan satu kata: "OK"',
+    contents: 'Hi',
   });
+  const response = await Promise.race([requestPromise, timeoutPromise]);
   return response.text ? true : false;
 }
 
@@ -140,19 +143,6 @@ export async function sendMessageStreaming(userMessage, onChunk, onDone, onError
     onDone(fullResponse);
   } catch (error) {
     console.error('AI Error:', error);
-
-    let userFriendlyMessage = 'Terjadi error saat menghubungi Gemini API.';
-
-    if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('401')) {
-      userFriendlyMessage = 'API key tidak valid. Cek lagi di Pengaturan.';
-    } else if (error.message?.includes('QUOTA') || error.message?.includes('429')) {
-      userFriendlyMessage = 'Kuota API habis. Coba lagi nanti atau ganti API key.';
-    } else if (error.message?.includes('fetch') || error.message?.includes('network')) {
-      userFriendlyMessage = 'Gagal terhubung ke server. Cek koneksi internet kamu.';
-    } else if (error.message) {
-      userFriendlyMessage = `Error: ${error.message}`;
-    }
-
-    onError(new Error(userFriendlyMessage));
+    onError(new Error('Terjadi kesalahan, mohon coba lagi.'));
   }
 }
