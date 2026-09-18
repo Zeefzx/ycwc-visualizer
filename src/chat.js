@@ -62,12 +62,12 @@ function renderMath(html) {
  */
 function extractVisualizations(text) {
   const visualizations = [];
+  const placeholders = {};
   // Match ```html ... ``` code blocks (the AI generates these)
   const regex = /```html\s*\n([\s\S]*?)```/g;
-  let match;
 
-  while ((match = regex.exec(text)) !== null) {
-    const htmlCode = match[1].trim();
+  let cleanText = text.replace(regex, (fullMatch, htmlCode) => {
+    htmlCode = htmlCode.trim();
     // Only treat as visualization if it looks like a full HTML document or has canvas/svg
     if (
       htmlCode.includes('<canvas') ||
@@ -78,11 +78,15 @@ function extractVisualizations(text) {
       htmlCode.includes('<style')
     ) {
       const id = `viz-${++vizCounter}`;
-      visualizations.push({ id, html: htmlCode, fullMatch: match[0] });
+      const placeholder = `%%VIZ_PLACEHOLDER_${id}%%`;
+      visualizations.push({ id, html: htmlCode, placeholder });
+      placeholders[placeholder] = id;
+      return placeholder;
     }
-  }
+    return fullMatch; // keep non-viz code blocks as-is
+  });
 
-  return { visualizations };
+  return { cleanText, visualizations };
 }
 
 /**
@@ -122,29 +126,21 @@ function createVisualizationHTML(htmlCode, id) {
 
 /**
  * Process AI text: markdown + math rendering + visualization embedding.
+ * Uses placeholder approach: replace HTML blocks before marked, then swap after.
  */
 function renderContent(text) {
-  const { visualizations } = extractVisualizations(text);
+  const { cleanText, visualizations } = extractVisualizations(text);
 
-  // First render markdown normally
-  let html = marked.parse(text);
+  // Render markdown on the cleaned text (placeholders won't be touched by marked)
+  let html = marked.parse(cleanText);
   html = renderMath(html);
 
-  // Now replace the rendered code blocks with interactive iframes
-  // marked will have wrapped the HTML code blocks in <pre><code> tags
+  // Replace placeholders with interactive iframes
   for (const viz of visualizations) {
-    // Find the <pre><code> block that contains this visualization's code
-    // We need to match the rendered version (marked escapes HTML entities in code blocks)
     const vizHtml = createVisualizationHTML(viz.html, viz.id);
-
-    // Strategy: find <pre> blocks that contain key parts of the visualization code
-    // marked renders ```html as <pre><code class="language-html">...</code></pre>
-    const preRegex = /<pre><code class="language-html">[\s\S]*?<\/code><\/pre>/;
-    const preMatch = html.match(preRegex);
-
-    if (preMatch) {
-      html = html.replace(preMatch[0], vizHtml);
-    }
+    // The placeholder might be wrapped in <p> tags by marked
+    html = html.replace(new RegExp(`<p>${viz.placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}</p>`), vizHtml);
+    html = html.replace(viz.placeholder, vizHtml);
   }
 
   return html;
