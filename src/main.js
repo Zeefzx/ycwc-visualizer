@@ -116,8 +116,8 @@ function ensureActiveChat() {
 /**
  * Handle sending a message.
  */
-async function handleSend() {
-  const message = inputMessage.value.trim();
+async function handleSend(retryMessage) {
+  const message = retryMessage || inputMessage.value.trim();
   if (!message || isSending) return;
 
   if (!isInitialized()) {
@@ -131,16 +131,18 @@ async function handleSend() {
   // Ensure we have a chat session
   ensureActiveChat();
 
-  // Clear input
-  inputMessage.value = '';
-  autoResize();
+  // Clear input (only if not a retry)
+  if (!retryMessage) {
+    inputMessage.value = '';
+    autoResize();
+  }
 
-  // Add user message to UI
-  addUserMessage(message);
-
-  // Save user message to history
-  addMessageToChat(currentChatId, 'user', message, getHistory());
-  renderHistoryList();
+  // Add user message to UI (only if not a retry — user bubble already exists)
+  if (!retryMessage) {
+    addUserMessage(message);
+    addMessageToChat(currentChatId, 'user', message, getHistory());
+    renderHistoryList();
+  }
 
   // Create AI message placeholder
   const aiMessage = createAIMessage();
@@ -166,7 +168,10 @@ async function handleSend() {
     },
     // onError
     (error) => {
-      aiMessage.showError(error.message);
+      aiMessage.showError(error.message, () => {
+        // Retry: re-send the same message
+        handleSend(message);
+      });
       isSending = false;
       updateSendButton();
       inputMessage.focus();

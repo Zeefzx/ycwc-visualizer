@@ -482,6 +482,7 @@ a:hover {
   overflow-y: auto;
   padding: var(--spacing-xl) var(--spacing-lg);
   scroll-behavior: smooth;
+  min-height: 0;
 }
 
 /* --- Welcome Screen --- */
@@ -1267,6 +1268,35 @@ a:hover {
   color: var(--danger);
   font-size: var(--font-size-sm);
   line-height: 1.5;
+}
+
+.btn-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-retry:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.btn-retry:hover svg {
+  transform: rotate(-45deg);
+}
+
+.btn-retry svg {
+  transition: transform 0.3s ease;
 }
 
 /* --- Responsive --- */

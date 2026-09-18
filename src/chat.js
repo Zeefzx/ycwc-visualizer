@@ -313,10 +313,32 @@ export function createAIMessage() {
     },
 
     /**
-     * Show an error in the message area.
+     * Show an error with a retry button.
+     * @param {string} errorMessage - The error text
+     * @param {function} [onRetry] - Callback when retry is clicked
      */
-    showError(errorMessage) {
+    showError(errorMessage, onRetry) {
       bubbleEl.innerHTML = `<div class="error-inline">⚠️ ${escapeHtml(errorMessage)}</div>`;
+
+      if (onRetry) {
+        const retryBtn = document.createElement('button');
+        retryBtn.className = 'btn-retry';
+        retryBtn.title = 'Coba lagi';
+        retryBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          <span>Coba lagi</span>
+        `;
+        retryBtn.addEventListener('click', () => {
+          // Remove the error message + retry button
+          messageEl.remove();
+          onRetry();
+        });
+        messageEl.appendChild(retryBtn);
+      }
+
       scrollToBottom();
     }
   };
