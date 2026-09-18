@@ -68,7 +68,7 @@ function init() {
   });
 
   // Send button
-  btnSend.addEventListener('click', handleSend);
+  btnSend.addEventListener('click', () => handleSend());
 
   // Input handling
   inputMessage.addEventListener('input', () => {
@@ -117,7 +117,7 @@ function ensureActiveChat() {
  * Handle sending a message.
  */
 async function handleSend(retryMessage) {
-  const message = retryMessage || inputMessage.value.trim();
+  const message = (typeof retryMessage === 'string') ? retryMessage : inputMessage.value.trim();
   if (!message || isSending) return;
 
   if (!isInitialized()) {
