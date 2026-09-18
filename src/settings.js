@@ -145,6 +145,8 @@ export function initSettings(onKeyReady) {
         const msg = err.message || '';
         if (msg.includes('API_KEY_INVALID') || msg.includes('401')) {
           showStatus(statusEl, '❌ API key tidak valid.', 'error');
+        } else if (msg.includes('TIMEOUT')) {
+          showStatus(statusEl, '❌ Koneksi timeout, mohon coba lagi.', 'error');
         } else {
           showStatus(statusEl, '❌ Terjadi kesalahan, mohon coba lagi.', 'error');
         }

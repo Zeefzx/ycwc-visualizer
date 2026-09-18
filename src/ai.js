@@ -60,7 +60,8 @@ export function setHistory(history) {
 
 /**
  * Test the API key by making a small request with a timeout.
- * Returns true if valid, throws error if not.
+ * Throws with 'API_KEY_INVALID' in message if key is bad.
+ * Throws with 'TIMEOUT' if it takes too long.
  */
 export async function testApiKey(apiKey) {
   const testClient = new GoogleGenAI({ apiKey });
@@ -71,8 +72,16 @@ export async function testApiKey(apiKey) {
     model: 'gemini-3.6-flash',
     contents: 'Hi',
   });
-  const response = await Promise.race([requestPromise, timeoutPromise]);
-  return response.text ? true : false;
+
+  try {
+    const response = await Promise.race([requestPromise, timeoutPromise]);
+    if (!response || !response.text) {
+      throw new Error('EMPTY_RESPONSE');
+    }
+    return true;
+  } catch (err) {
+    throw err;
+  }
 }
 
 /**
